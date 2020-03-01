@@ -122,10 +122,11 @@ $ source devel/setup.bash
 ## Setting up a UR robot for ur_robot_driver
 ### Prepare the robot
 For using the *ur_robot_driver* with a real robot you need to install the
-**externalcontrol-1.0.urcap** which can be found inside the **resources** folder of this driver.
+**externalcontrol-1.0.urcap** on your robot's teach pendant. URCAP can be found inside the **resources** folder of this driver.
 
-**Note**: For installing this URCap a minimal PolyScope version of 3.7 or 5.1 (in case of e-Series) is
-necessary.
+**Note**: For installing this URCap on an e-Series robot, you need at least PolyScope version 5.1. 
+If your robot is not an e-Series robot, you need PolyScope version 3.7 or higher. 
+
 
 For installing the necessary URCap and creating a program, please see the individual tutorials on
 how to [setup a CB3 robot](ur_robot_driver/doc/install_urcap_cb3.md) or how to [setup an e-Series
@@ -135,18 +136,14 @@ To setup the tool communication on an e-Series robot, please consider the [tool 
 guide](ur_robot_driver/doc/setup_tool_communication.md).
 
 ### Prepare the ROS PC
-For using the driver make sure it is installed (either by the debian package or built from source
-inside a catkin workspace).
+For using the driver make sure the driver is installed on your computer. See instructions above about the installation process. 
+(Alternately you can  install by the debian package. However you choose to install the driver, make sure you installed it into a functioning catkin workspace). 
 
 #### Extract calibration information
-Each UR robot is calibrated inside the factory giving exact forward and inverse kinematics. To also
-make use of this in ROS, you first have to extract the calibration information from the robot.
+Each UR robot is factory calibrated, for exact forward and inverse kinematics. To 
+make use of the calibration information, you  have to extract it from the robot.
 
-Though this step is not necessary to control the robot using this driver, it is highly recommended
-to do so, as otherwise endeffector positions might be off in the magnitude of centimeters.
-
-
-For this, there exists a helper script:
+Use this helper script to extract your callibration:
 
     $ roslaunch ur_calibration calibration_correction.launch \
       robot_ip:=<robot_ip> target_filename:="${HOME}/my_robot_calibration.yaml"
@@ -154,19 +151,29 @@ For this, there exists a helper script:
 For the parameter `robot_ip` insert the IP address on which the ROS pc can reach the robot. As
 `target_filename` provide an absolute path where the result will be saved to.
 
-We recommend keeping calibrations for all robots in your organization in a common package. See the
-[package's documentation](ur_calibration/README.md) for details.
+Though this step is not strictly necessary to control the robot using this driver, it is highly recommended
+to do so, as otherwise endeffector positions might be off in the magnitude of centimeters.
+
+We recommend keeping calibrations for all robots in your organization in a common package. 
+See the [package's documentation](ur_calibration/README.md) for details.
 
 #### Quick start
-Once the driver is built and the **externalcontrol** URCap is installed and running on the robot, you are good
-to go ahead starting the driver. (**Note**: We do recommend, though, to calibrate your robot first.)
+Make sure the driver is built on your computer, and the **externalcontrol** URCap is installed on the robot. 
 
-To actually start the robot driver use one of the existing launch files
+Turn on your Robot. The boot process usually takes some time. Now check to make sure that PolyScope is not trying to keep controll over your Robot's TCP/IP connection. (This causes timing issues with the ROS driver and PC) 
+-For an e-Series Robot go to the *Installation* menue point. In the side Pannel go to the  *Fieldbus* tab. Click on *EtherNet/IP* and choose the *disable* option.
+-For an older, not e-Series Robot, go to *Installation*, choose the menue point *EtherNet/IP*. Choose the *disable* option. 
+ See the debug section of this document for more details about this.
+
+
+Now start the driver on your PC. (**Note**: Calibrating your robot before using ROS to controll it is recomended, but not strictly necarry for a quick start.)
+
+Use this launchfile :
 
     $ roslaunch ur_robot_driver <robot_type>_bringup.launch robot_ip:=192.168.56.101
 
-where **<robot_type>** is one of *ur3, ur5, ur10, ur3e, ur5e, ur10e*. Note that in this example we
-load the calibration parameters for the robot "ur10_example".
+Exchange **<robot_type>**  to the type of your robot. Types are: *ur3, ur5, ur10, ur3e, ur5e, ur10e*.
+(Note that in this example we load the calibration parameters for the robot "ur10_example".)
 
 If you calibrated your robot before, pass that calibration to the launch file:
 
@@ -178,8 +185,12 @@ an error during startup, but will remain usable.
 
 For more information on the launch file's parameters see its own documentation.
 
-Once the robot driver is started, load the previously generated program on the robot panel and
-execute it. From that moment on the robot is fully functional. You can make use of the pause
+Once the robot driver is started on the PC, turn your robot "on". the "on" state is indicated by a little green dot, at the left side of bottom of the touchscreen. Touching the red or yellow dot will bring you to the screen you need. You will hear the breaks clicking when releasing the robot, and the indicator  will turn green.
+
+Select the "external controll" program on the robot's panel and
+press the *play* button.
+
+From that moment on the robot is fully functional. You can make use of the pause
 function or even stop the program. Simply press the play button again and the ROS driver will
 reconnect.
 
